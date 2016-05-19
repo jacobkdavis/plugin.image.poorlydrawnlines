@@ -21,7 +21,7 @@ ITEMS_PER_PAGE = 10
 @plugin.route('/')
 def root():
     items = [
-        (plugin.url_for(todaysimages), xbmcgui.ListItem("Today´s images"), True),
+        (plugin.url_for(todaysimages), xbmcgui.ListItem("Today's images"), True),
         (plugin.url_for(browsebyoffset), xbmcgui.ListItem("Browse by offset"), True),
     ]
     xbmcplugin.addDirectoryItems(plugin.handle, items)
@@ -73,31 +73,23 @@ def get_pdl_images(limit=ITEMS_PER_PAGE, offset=0, randomize=False):
     response = get_http(archiveurl)
     
     if response:
-        
         comicurls = re.findall("href='http://poorlydrawnlines.com/comic/(.+?)/'", response, re.DOTALL)
 
         for i in range(0, limit):
             comic_id = random.randrange(1, len(comicurls)) if randomize else i + offset
-            
             url = baseurl + comicurls[comic_id]
-            
             comiccontent = get_http(url)
             
             if comiccontent:
-                
                 img = re.search("<img.*?src=\"(http://poorlydrawnlines.com/wp-content/uploads/.+?)\"", comiccontent).group(1)
-                
                 newitem = {'thumb': img,
                             'index': comicurls[comic_id],
                             'label': comicurls[comic_id]}
-                
                 items.append(newitem)
             
     save_to_file(content=items,
                  filename=filename,
                  path=ADDON_DATA_PATH)
-
-
 
     return items
 
