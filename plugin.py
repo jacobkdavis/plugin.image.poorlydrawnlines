@@ -76,8 +76,6 @@ def get_pdl_images(limit=ITEMS_PER_PAGE, offset=0, randomize=False):
     r = requests.get(archiveurl)
     comicurls = re.findall("href='http://poorlydrawnlines.com/comic/(.+?)/'", r.content, re.DOTALL)
 
-   # imgs = []
-
     for i in range(0, limit):
         comic_id = random.randrange(1, MAX_COUNT) if randomize else i + offset
         
@@ -85,7 +83,6 @@ def get_pdl_images(limit=ITEMS_PER_PAGE, offset=0, randomize=False):
         
         comiccontent = requests.get(url).content
         img = re.search("<img.*?src=\"(http://poorlydrawnlines.com/wp-content/uploads/.+?)\"", comiccontent).group(1)
-        #imgs.append(img)
         
         newitem = {'thumb': img,
                     'index': comicurls[comic_id],
