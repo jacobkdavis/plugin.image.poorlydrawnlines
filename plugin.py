@@ -81,7 +81,7 @@ def get_pdl_images(limit=ITEMS_PER_PAGE, offset=0, randomize=False):
             comiccontent = get_http(url)
             
             if comiccontent:
-                img = re.search("<img.*?src=\"(http://poorlydrawnlines.com/wp-content/uploads/.+?)\"", comiccontent).group(1)
+                img = re.search("<img.*?src=\"(http://poorlydrawnlines.com/wp-content/uploads/.+?\.png)\"", comiccontent).group(1)
                 newitem = {'thumb': img,
                             'index': comicurls[comic_id],
                             'label': comicurls[comic_id]}
