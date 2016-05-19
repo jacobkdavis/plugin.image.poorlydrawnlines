@@ -12,12 +12,9 @@ import routing
 import re
 from resources.lib.Utils import *
 
-from lxml import html
-import requests
-
 plugin = routing.Plugin()
 
-MAX_COUNT = 3868
+MAX_COUNT = 700
 ITEMS_PER_PAGE = 10
 
 
@@ -34,7 +31,7 @@ def root():
 @plugin.route('/todaysimages')
 def todaysimages():
     xbmcplugin.setContent(plugin.handle, 'images')
-    items = get_pdl_images(randomize=True)
+    items = get_pdl_images(randomize=False)
     for item in items:
         add_image(item)
     xbmcplugin.endOfDirectory(plugin.handle)
@@ -72,22 +69,29 @@ def get_pdl_images(limit=ITEMS_PER_PAGE, offset=0, randomize=False):
 
     archiveurl = "http://poorlydrawnlines.com/archive/"
     baseurl = "http://poorlydrawnlines.com/comic/"
+    
+    response = get_http(archiveurl)
+    
+    if response:
+        
+        comicurls = re.findall("href='http://poorlydrawnlines.com/comic/(.+?)/'", response, re.DOTALL)
 
-    r = requests.get(archiveurl)
-    comicurls = re.findall("href='http://poorlydrawnlines.com/comic/(.+?)/'", r.content, re.DOTALL)
-
-    for i in range(0, limit):
-        comic_id = random.randrange(1, MAX_COUNT) if randomize else i + offset
-        
-        url = baseurl + comicurls[comic_id]
-        
-        comiccontent = requests.get(url).content
-        img = re.search("<img.*?src=\"(http://poorlydrawnlines.com/wp-content/uploads/.+?)\"", comiccontent).group(1)
-        
-        newitem = {'thumb': img,
-                    'index': comicurls[comic_id],
-                    'label': comicurls[comic_id]}
-        items.append(newitem)
+        for i in range(0, limit):
+            comic_id = random.randrange(1, len(comicurls)) if randomize else i + offset
+            
+            url = baseurl + comicurls[comic_id]
+            
+            comiccontent = get_http(url)
+            
+            if comiccontent:
+                
+                img = re.search("<img.*?src=\"(http://poorlydrawnlines.com/wp-content/uploads/.+?)\"", comiccontent).group(1)
+                
+                newitem = {'thumb': img,
+                            'index': comicurls[comic_id],
+                            'label': comicurls[comic_id]}
+                
+                items.append(newitem)
             
     save_to_file(content=items,
                  filename=filename,
